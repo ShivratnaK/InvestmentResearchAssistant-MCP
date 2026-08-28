@@ -1,7 +1,15 @@
+import os
+
 import yfinance as yf
 from fastmcp import FastMCP
+from fastmcp.server.auth.providers.jwt import JWTVerifier
 
-mcp = FastMCP("Finance Server")
+auth = JWTVerifier(
+    public_key=os.environ["MCP_SHARED_SECRET"],  # param name is misleading — this is your shared secret
+    algorithm="HS256",
+)
+
+mcp = FastMCP("Finance Server", auth=auth)
 
 
 @mcp.tool
@@ -16,5 +24,5 @@ if __name__ == "__main__":
     mcp.run(
         transport="http",
         host="0.0.0.0",
-        port=8000,
+        port=int(os.environ.get("PORT", 8000)),  # Render assigns PORT dynamically
     )

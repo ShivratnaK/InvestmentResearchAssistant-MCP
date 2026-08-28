@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
@@ -11,33 +12,32 @@ load_dotenv()
 
 llm = ChatGroq(
     model="qwen/qwen3.6-27b",
-    temperature=0
+    temperature=0,
 )
 
 
 async def create_graph():
 
-    # Connect to our Finance MCP Server
     client = MultiServerMCPClient(
         {
             "finance": {
-                "transport": "http",
-                "url": "https://rubber-emerald-beetle.fastmcp.app/mcp",
+                "transport": "streamable_http",
+                "url": os.environ["MCP_SERVER_URL"],  # your Render URL, e.g. https://xxx.onrender.com/mcp
+                "headers": {
+                    "Authorization": f"Bearer {os.environ['MCP_CLIENT_TOKEN']}"
+                },
             }
         }
     )
 
-    # Get tools exposed by the MCP server
     tools = await client.get_tools()
 
-    # Give the tools to the LLM
     model_with_tools = llm.bind_tools(tools)
 
     def call_model(state: MessagesState):
         response = model_with_tools.invoke(state["messages"])
         return {"messages": [response]}
 
-    # Build LangGraph
     builder = StateGraph(MessagesState)
 
     builder.add_node("llm", call_model)
@@ -45,14 +45,11 @@ async def create_graph():
 
     builder.add_edge(START, "llm")
 
-    # If LLM wants a tool → tools
-    # Otherwise → finish
     builder.add_conditional_edges(
         "llm",
-        tools_condition
+        tools_condition,
     )
 
-    # Tool result goes back to LLM
     builder.add_edge("tools", "llm")
 
     return builder.compile()
@@ -66,6 +63,7 @@ async def main():
     print("Type 'exit' to quit.\n")
 
     while True:
+
         user_input = input("You: ")
 
         if user_input.lower() == "exit":
