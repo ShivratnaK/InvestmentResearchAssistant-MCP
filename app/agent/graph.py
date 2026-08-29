@@ -35,10 +35,14 @@ async def create_graph():
         {
             "finance": {
                 "transport": "streamable_http",
-                "url": require_env("MCP_SERVER_URL"),  # Railway URL, e.g. https://xxx.up.railway.app/mcp
+                "url": require_env("MCP_SERVER_URL"),  # Render URL, e.g. https://xxx.onrender.com/mcp
                 "headers": {
                     "Authorization": f"Bearer {require_env('MCP_CLIENT_TOKEN')}"
                 },
+                # Render spins a free service down after 15 minutes idle and takes
+                # ~50s to wake. The adapter default is 30s, which the first request
+                # after an idle period would always exceed.
+                "timeout": 90,
             }
         }
     )

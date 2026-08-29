@@ -13,7 +13,7 @@ def require_env(name: str) -> str:
 
     if not value:
         raise RuntimeError(
-            f"{name} is not set. Add it under Variables on the Railway service."
+            f"{name} is not set. Add it under Environment on the Render service."
         )
 
     return value
@@ -29,7 +29,7 @@ mcp = FastMCP("Finance Server", auth=auth)
 
 @mcp.custom_route("/healthz", methods=["GET"])
 async def healthz(request: Request) -> JSONResponse:
-    """Unauthenticated liveness probe for Railway's health check."""
+    """Unauthenticated liveness probe for Render's health check."""
     return JSONResponse({"status": "ok"})
 
 
@@ -49,5 +49,5 @@ if __name__ == "__main__":
     mcp.run(
         transport="http",
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", 8000)),  # Railway assigns PORT dynamically
+        port=int(os.environ.get("PORT", 8000)),  # Render assigns PORT dynamically
     )
