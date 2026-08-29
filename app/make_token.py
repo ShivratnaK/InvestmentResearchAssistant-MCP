@@ -7,7 +7,7 @@ SECRET = os.environ.get("MCP_SHARED_SECRET")
 
 if not SECRET:
     raise SystemExit(
-        "MCP_SHARED_SECRET is not set. Export the same secret you put on Railway:\n"
+        "MCP_SHARED_SECRET is not set. Export the same secret you put on Render:\n"
         '  PowerShell:  $env:MCP_SHARED_SECRET = "<your secret>"\n'
         '  bash:        export MCP_SHARED_SECRET="<your secret>"'
     )

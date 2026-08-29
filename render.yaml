@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: finance-mcp-server
+    runtime: docker
+    plan: free
+    # Oregon, not Singapore: MCP calls originate from Streamlit Community Cloud's
+    # US servers, not from a browser, so US-adjacent wins on latency.
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: MCP_SHARED_SECRET
+        sync: false  # prompted for on Blueprint creation; never committed
