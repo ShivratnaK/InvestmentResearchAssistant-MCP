@@ -1,2 +1,0 @@
-fastmcp==3.4.7
-yfinance==1.7.0

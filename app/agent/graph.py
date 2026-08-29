@@ -10,21 +10,34 @@ from langgraph.prebuilt import ToolNode, tools_condition
 load_dotenv()
 
 
-llm = ChatGroq(
-    model="qwen/qwen3.6-27b",
-    temperature=0,
-)
+def require_env(name: str) -> str:
+    """Read a required environment variable, failing with a readable message."""
+    value = os.environ.get(name)
+
+    if not value:
+        raise RuntimeError(
+            f"{name} is not set. Add it to .env locally, or to Secrets on Streamlit Cloud."
+        )
+
+    return value
 
 
 async def create_graph():
+
+    require_env("GROQ_API_KEY")
+
+    llm = ChatGroq(
+        model="qwen/qwen3.6-27b",
+        temperature=0,
+    )
 
     client = MultiServerMCPClient(
         {
             "finance": {
                 "transport": "streamable_http",
-                "url": os.environ["MCP_SERVER_URL"],  # your Render URL, e.g. https://xxx.onrender.com/mcp
+                "url": require_env("MCP_SERVER_URL"),  # Railway URL, e.g. https://xxx.up.railway.app/mcp
                 "headers": {
-                    "Authorization": f"Bearer {os.environ['MCP_CLIENT_TOKEN']}"
+                    "Authorization": f"Bearer {require_env('MCP_CLIENT_TOKEN')}"
                 },
             }
         }
